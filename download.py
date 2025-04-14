@@ -12,9 +12,9 @@ WEBSITE = 'https://earthexplorer.usgs.gov/'
 
 def download(url=WEBSITE, pattern='.*'):
     options = Options()
-    logging.debug('options: %s', options)
-    options.capabilities['browserName'] = 'chromium'  # not "chrome"
-    logging.debug('options.capabilities: %s', options.capabilities)
+#   logging.debug('options: %s', options)
+#   options.capabilities['browserName'] = 'chromium'  # not "chrome"
+#   logging.debug('options.capabilities: %s', options.capabilities)
     service = Service(executable_path='/usr/bin/chromedriver')
     driver = webdriver.Chrome(options=options, service=service)
     driver.get(url)
