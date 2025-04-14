@@ -1,4 +1,8 @@
 SHELL := /bin/bash
+OPT := # use `-OO` for speed, no debugging output
+PYTHON := python3 $(OPT)
+download: download.py
+	$(PYTHON) $<
 %.bil: %_bil.zip
 	unzip -o $<
 # rename e.g. n00_e000_3arc_v2.bil to /usr/local/share/gis/hgt/N00E000.hgt
