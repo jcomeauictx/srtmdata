@@ -11,6 +11,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import InvalidArgumentException, \
     TimeoutException, ElementClickInterceptedException
+from selenium.webdriver.common.action_chains import ActionChains
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 
 WEBSITE = 'https://earthexplorer.usgs.gov/'
@@ -18,6 +19,7 @@ CHROMEDRIVER = which('chromedriver')
 SERVICE = Service(executable_path=CHROMEDRIVER)
 DRIVER = webdriver.Chrome(service=SERVICE)
 ELEMENT_WAIT = 10  # default time to wait for element to appear
+ACTIONS = ActionChains(DRIVER)
 
 def download(url=WEBSITE, pattern='.*'):
     DRIVER.get(url)
@@ -34,6 +36,7 @@ def click(identifier, idtype=By.ID):
                 (idtype, identifier)
             )
         )
+        ACTIONS.move_to_element(element).perform()
         element.click()
     except InvalidArgumentException:
         logging.error('invalid argument "%s", %s', identifier, idtype)
