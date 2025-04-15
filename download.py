@@ -23,10 +23,11 @@ ACTIONS = ActionChains(DRIVER)
 
 def download(url=WEBSITE, pattern='.*'):
     DRIVER.get(url)
-    click('//div[@id="tab2" and text()="Data Sets"]')
+    click('//div[@id="tab2" and text()="Data Sets"]')  # Data Sets tab
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
     click('//input[@id="coll_5e83a43c37d31d83"]')  # SRTM Void Filled
+    click('//div[@id="tab4" and text()="Results"]')  # Results tab
     time.sleep(600)  # give developer time to locate problems before closing
 
 def click(identifier, idtype=By.ID):
