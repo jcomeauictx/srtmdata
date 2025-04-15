@@ -9,6 +9,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
+from selenium.common.exceptions import InvalidArgumentException, \
+    TimeoutException
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 
 WEBSITE = 'https://earthexplorer.usgs.gov/'
@@ -29,9 +31,11 @@ def click(driver, identifier, idtype=By.ID):
             )
         )
         element.click()
-    finally:
-        pass
-    
+    except InvalidArgumentException:
+        logging.error('invalid argument "%s", %s', identifier, idtype)
+    except TimeoutException:
+        logging.error('timed out waiting for "%s", %s', identifier, idtype)
+
 if __name__ == '__main__':
     download(*sys.argv[1:])
 
