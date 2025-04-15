@@ -21,11 +21,13 @@ ELEMENT_WAIT = 10  # default time to wait for element to appear
 
 def download(url=WEBSITE, pattern='.*'):
     DRIVER.get(url)
-    click('tab2')
-    click('cat_207')
+    click('//div#tab2[matches(., "^Data Sets$")]')
+    click('//li#cat_207/div[matches(., "^Digital Elevation$")]')
     time.sleep(600)  # give developer time to locate problems before closing
 
 def click(identifier, idtype=By.ID):
+    if identifier.startswith('/'):
+        idtype = By.XPATH
     try:
         element = WebDriverWait(DRIVER, ELEMENT_WAIT).until(
             expected_conditions.presence_of_element_located(
