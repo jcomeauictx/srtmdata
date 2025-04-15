@@ -15,17 +15,18 @@ logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 
 WEBSITE = 'https://earthexplorer.usgs.gov/'
 CHROMEDRIVER = which('chromedriver')
+ELEMENT_WAIT = 10  # default time to wait for element to appear
 
 def download(url=WEBSITE, pattern='.*'):
     service = Service(executable_path=CHROMEDRIVER)
     driver = webdriver.Chrome(service=service)
     driver.get(url)
-    click(driver, '//div[contains(., "Data Sets")]', By.XPATH)
+    click(driver, 'tab2', By.ID)
     time.sleep(600)  # give developer time to locate problems before closing
 
 def click(driver, identifier, idtype=By.ID):
     try:
-        element = WebDriverWait(driver, 10).until(
+        element = WebDriverWait(driver, ELEMENT_WAIT).until(
             expected_conditions.presence_of_element_located(
                 (idtype, identifier)
             )
