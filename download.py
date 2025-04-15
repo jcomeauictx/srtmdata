@@ -21,14 +21,14 @@ DRIVER = webdriver.Chrome(service=SERVICE)
 ELEMENT_WAIT = 10  # default time to wait for element to appear
 ACTIONS = ActionChains(DRIVER)
 
-def download(url=WEBSITE, pattern='.*'):
+def download(url=WEBSITE, pattern='.*_3arc_'):
     DRIVER.get(url)
     click('//div[@id="tab2" and text()="Data Sets"]')  # Data Sets tab
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
     click('//input[@id="coll_5e83a43c37d31d83"]')  # SRTM Void Filled
     click('//div[@id="tab3" and text()="Additional Criteria"]')
-    click('//a[@title="Resolution"]/following-sibling::i[1]')
+    click('//a[@title="Resolution"]/following-sibling::i')
     click('//select[@id="5e83a43cde24c7d0_1"]')
     if '_3arc_' in pattern:
         click('//option[@value="3-ARC"]')
