@@ -21,8 +21,8 @@ ELEMENT_WAIT = 10  # default time to wait for element to appear
 
 def download(url=WEBSITE, pattern='.*'):
     DRIVER.get(url)
-    click('//div#tab2[matches(., "^Data Sets$")]')
-    click('//li#cat_207/div[matches(., "^Digital Elevation$")]')
+    click('//div[@id="tab2"]')
+    click('//li[@id="cat_207"]/div')
     time.sleep(600)  # give developer time to locate problems before closing
 
 def click(identifier, idtype=By.ID):
