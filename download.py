@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import InvalidArgumentException, \
-    TimeoutException
+    TimeoutException, ElementClickInterceptedException
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 
 WEBSITE = 'https://earthexplorer.usgs.gov/'
@@ -22,7 +22,7 @@ ELEMENT_WAIT = 10  # default time to wait for element to appear
 def download(url=WEBSITE, pattern='.*'):
     DRIVER.get(url)
     click('//div[@id="tab2" and text()="Data Sets"]')
-    click('//li[@id="cat_207"]//span')
+    click('//li[@id="cat_207"]//span/div/strong')
     time.sleep(600)  # give developer time to locate problems before closing
 
 def click(identifier, idtype=By.ID):
@@ -39,6 +39,8 @@ def click(identifier, idtype=By.ID):
         logging.error('invalid argument "%s", %s', identifier, idtype)
     except TimeoutException:
         logging.error('timed out waiting for "%s", %s', identifier, idtype)
+    except ElementClickInterceptedException:
+        logging.error('element "%s", %s not clickable', identifier, idtype)
 
 if __name__ == '__main__':
     download(*sys.argv[1:])
