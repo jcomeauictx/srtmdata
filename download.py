@@ -20,7 +20,7 @@ def download(url=WEBSITE, pattern='.*'):
     service = Service(executable_path=CHROMEDRIVER)
     driver = webdriver.Chrome(service=service)
     driver.get(url)
-    click(driver, '//div[contains(., "Data Sets")]', By.XPATH)
+    click(driver, '//div[contains(., "Data Sets")]/text()', By.XPATH)
     time.sleep(600)  # give developer time to locate problems before closing
 
 def click(driver, identifier, idtype=By.ID):
