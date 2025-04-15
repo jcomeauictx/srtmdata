@@ -27,6 +27,15 @@ def download(url=WEBSITE, pattern='.*'):
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
     click('//input[@id="coll_5e83a43c37d31d83"]')  # SRTM Void Filled
+    click('//div[@id="tab3" and text()="Additional Criteria"]')
+    click('//a[@title="Resolution"]/following-sibling::i[1]')
+    click('//select[@id="5e83a43cde24c7d0_1"]')
+    if '_3arc_' in pattern:
+        click('//option[@value="3-ARC"]')
+    elif '_1arc_' in pattern:
+        click('//option[@value="1-ARC"]')
+    else:
+        click('//option[@value=""]')  # default, all resolutions
     click('//div[@id="tab4" and text()="Results"]')  # Results tab
     time.sleep(600)  # give developer time to locate problems before closing
 
