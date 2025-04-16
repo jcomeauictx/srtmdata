@@ -44,7 +44,7 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
     logging.debug('resolution selectbox should now be visible')
     time.sleep(10)  # pause for a moment to check
-    select = find('//select/option[3][@value="3-ARC"]/..')[0]
+    select = find('//div[@class="col"]/select/option[3][@value="3-ARC"]/..')[0]
     arc = Select(select)
     # preselected default is "All" resolutions
     if '_3arc_' in pattern:
