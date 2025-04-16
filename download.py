@@ -27,11 +27,11 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
     find('//label[text()="SRTM Void Filled"]')
-    find('//label[text()="SRTM Void Filled"]/..')
-    find('//label[text()="SRTM Void Filled"]/parent::')
-    click('//label[text()="SRTM Void Filled"]'
-          '/../previous-sibling::div[3]'
-          '/input')
+    find('//label[text()="SRTM Void Filled"]/..')  # containing div
+    find('//label[text()="SRTM Void Filled"]/../..')  # containing span
+    find('//label[text()="SRTM Void Filled"]/../../div')  # span's 1st div
+    find('//label[text()="SRTM Void Filled"]/../../div/input')  # checkbox
+    click('//label[text()="SRTM Void Filled"]/../../div/input')  # check box
     click('//div[@id="tab3" and text()="Additional Criteria"]')
     click('//div[text()="Resolution"]/following-sibling::div[1]//i')
     click('//select/option[3][@value="3-ARC"]/parent::select')
