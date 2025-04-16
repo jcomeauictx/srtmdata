@@ -39,8 +39,8 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
         find('//div/strong[text()="Resolution"]/..')
         find('//div/strong[text()="Resolution"]/../..')
         find('//div/strong[text()="Resolution"]/../../div[2]')
-        find('//div/strong[text()="Resolution"]/../../div[2]//i')
-    click('//div/strong[text()="Resolution"]/../../div[2]//i')
+        find('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
+    click('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
     logging.debug('resolution selectbox should now be visible')
     time.sleep(10)  # pause for a moment to check
     click('//select/option[3][@value="3-ARC"]/..')  # parent "select"
