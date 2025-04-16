@@ -26,9 +26,9 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//div[@id="tab2" and text()="Data Sets"]')  # Data Sets tab
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
-    label = find('//label[text()="SRTM Void Filled"]')[0]
-    logging.debug('label: %s: tag=%s, text="%s"', label, label.tag_name,
-                  label.text)
+    find('//label[text()="SRTM Void Filled"]')
+    find('//label[text()="SRTM Void Filled"]/..')
+    find('//label[text()="SRTM Void Filled"]/parent::')
     click('//label[text()="SRTM Void Filled"]'
           '/../previous-sibling::div[3]'
           '/input')
@@ -50,11 +50,14 @@ def find(identifier, idtype=By.ID):
     '''
     if identifier.startswith('/'):
         idtype = By.XPATH
+    logging.debug('looking for %s, idtype: %s', identifier, idtype)
     element = WebDriverWait(DRIVER, ELEMENT_WAIT).until(
         expected_conditions.presence_of_element_located(
             (idtype, identifier)
         )
     )
+    logging.debug('found: %s: tag=%s, text="%s"', element, element.tag_name,
+                  element.text)
     return element, idtype
 
 def click(identifier, idtype=By.ID):
