@@ -26,15 +26,20 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//div[@id="tab2" and text()="Data Sets"]')  # Data Sets tab
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
-    find('//label[text()="SRTM Void Filled"]')
-    find('//label[text()="SRTM Void Filled"]/..')  # containing div
-    find('//label[text()="SRTM Void Filled"]/../..')  # containing span
-    find('//label[text()="SRTM Void Filled"]/../../div')  # span's 1st div
-    find('//label[text()="SRTM Void Filled"]/../../div/input')  # checkbox
+    if False:
+        find('//label[text()="SRTM Void Filled"]')
+        find('//label[text()="SRTM Void Filled"]/..')  # containing div
+        find('//label[text()="SRTM Void Filled"]/../..')  # containing span
+        find('//label[text()="SRTM Void Filled"]/../../div')  # span's 1st div
+        find('//label[text()="SRTM Void Filled"]/../../div/input')  # checkbox
     click('//label[text()="SRTM Void Filled"]/../../div/input')  # check box
     click('//div[@id="tab3" and text()="Additional Criteria"]')
-    click('//div[text()="Resolution"]/following-sibling::div[1]//i')
-    click('//select/option[3][@value="3-ARC"]/parent::select')
+    find('//div[text()="Resolution"]')
+    find('//div[text()="Resolution"]/..')
+    find('//div[text()="Resolution"]/../div[2]')
+    find('//div[text()="Resolution"]/../div[2]//i')
+    click('//div[text()="Resolution"]/../div[2]//i')
+    click('//select/option[3][@value="3-ARC"]/..')  # parent "select"
     if '_3arc_' in pattern:
         click('//option[@value="3-ARC"]')
     elif '_1arc_' in pattern:
