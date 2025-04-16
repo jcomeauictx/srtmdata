@@ -27,7 +27,8 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
     label = find('//label[text()="SRTM Void Filled"]')[0]
-    logging.debug('label: %s: %s', label, vars(label))
+    logging.debug('label: %s: tag=%s, text="%s"', label, label.tag_name,
+                  label.text)
     click('//label[text()="SRTM Void Filled"]'
           '/../previous-sibling::div[3]'
           '/input')
