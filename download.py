@@ -2,8 +2,9 @@
 '''
 download all SRTM3 data from USGS
 '''
-import sys, time, logging  # pylint: disable=multiple-imports
+import sys, time, netrc, logging  # pylint: disable=multiple-imports
 from shutil import which
+from urllib.parse import urlparse
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -16,6 +17,15 @@ from selenium.webdriver.common.action_chains import ActionChains
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 
 WEBSITE = 'https://earthexplorer.usgs.gov/'
+HOSTNAME = urlparse(WEBSITE).netloc
+try:
+    AUTHDATA = netrc.netrc().authenticators(HOSTNAME)
+    if AUTHDATA is None:
+        raise ValueError('no authentication data found for %s', HOSTNAME)
+except (FileNotFoundError, ValueError) as noauth:
+    AUTHDATA = None
+    logging.error('netrc failed, must log in via browser to download data: %s',
+                  noauth)
 CHROMEDRIVER = which('chromedriver')
 SERVICE = Service(executable_path=CHROMEDRIVER)
 DRIVER = webdriver.Chrome(service=SERVICE)
@@ -24,6 +34,23 @@ ACTIONS = ActionChains(DRIVER)
 
 def download(url=WEBSITE, pattern='.*_3arc_'):
     DRIVER.get(url)
+    try:
+        click('//a[@href="/login"]', By.XPATH, 0)
+        if not AUTHDATA:
+            logging.info('waiting a bit for you to login manually')
+            time.sleep(60)
+        else:
+            formfield = find('//form[@id="loginForm"]//input[@name="username"]')
+            formfield[0].send_keys(AUTHDATA[0])
+            formfield = find('//form[@id="loginForm"]//input[@name="password"]')
+            formfield[0].send_keys(AUTHDATA[2])
+            click('//input[@id="loginButton"]')
+    except TimeoutException:
+        logging.info('no login button, assuming already logged in')
+    logged_in = find('//a[@href="/logout/"]')
+    if not logged_in:
+        logging.error('cannot download SRTM data without logging in')
+        sys.exit(1)
     click('//div[@id="tab2" and text()="Data Sets"]')  # Data Sets tab
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
@@ -54,14 +81,14 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//div[@id="tab4" and text()="Results"]')  # Results tab
     time.sleep(600)  # give developer time to locate problems before closing
 
-def find(identifier, idtype=By.ID):
+def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
     '''
     find and return an element
     '''
     if identifier.startswith('/'):
         idtype = By.XPATH
     logging.debug('looking for %s, idtype: %s', identifier, idtype)
-    element = WebDriverWait(DRIVER, ELEMENT_WAIT).until(
+    element = WebDriverWait(DRIVER, wait).until(
         # presence_of_element_located True doesn't mean it's interactable
         expected_conditions.element_to_be_clickable(
             (idtype, identifier)
@@ -71,9 +98,9 @@ def find(identifier, idtype=By.ID):
                   element.text)
     return element, idtype
 
-def click(identifier, idtype=By.ID):
+def click(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
     try:
-        element, idtype = find(identifier, idtype)
+        element, idtype = find(identifier, idtype, wait)
         ACTIONS.move_to_element(element).perform()
         element.click()
     except InvalidArgumentException:
