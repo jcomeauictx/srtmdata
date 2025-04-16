@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import InvalidArgumentException, \
     TimeoutException, ElementClickInterceptedException
 from selenium.webdriver.common.action_chains import ActionChains
@@ -43,15 +44,13 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
     logging.debug('resolution selectbox should now be visible')
     time.sleep(10)  # pause for a moment to check
-    click('//select/option[3][@value="3-ARC"]/..')  # parent "select"
-    logging.debug('resolution options should now be expanded')
-    time.sleep(10)  # pause for a moment to check
+    select = find('//select/option[3][@value="3-ARC"]/..')[0]
+    arc = Select(select)
+    # preselected default is "All" resolutions
     if '_3arc_' in pattern:
-        click('//option[@value="3-ARC"]')
+        arc.select_by_value('3-ARC')
     elif '_1arc_' in pattern:
-        click('//option[@value="1-ARC"]')
-    else:
-        click('//option[@value=""]')  # default, all resolutions
+        arc.select_by_value('1-ARC')
     click('//div[@id="tab4" and text()="Results"]')  # Results tab
     time.sleep(600)  # give developer time to locate problems before closing
 
