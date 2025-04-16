@@ -26,11 +26,13 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//div[@id="tab2" and text()="Data Sets"]')  # Data Sets tab
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
+    label = find('//label[text()="SRTM Void Filled"]')[0]
+    logging.debug('label: %s: %s', label, vars(label))
     click('//label[text()="SRTM Void Filled"]'
-          '/parent::div/previous-sibling::div[3]'
+          '/../previous-sibling::div[3]'
           '/input')
     click('//div[@id="tab3" and text()="Additional Criteria"]')
-    click('//div[@text="Resolution"]/following-sibling::div[1]//i')
+    click('//div[text()="Resolution"]/following-sibling::div[1]//i')
     click('//select/option[3][@value="3-ARC"]/parent::select')
     if '_3arc_' in pattern:
         click('//option[@value="3-ARC"]')
@@ -41,15 +43,22 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//div[@id="tab4" and text()="Results"]')  # Results tab
     time.sleep(600)  # give developer time to locate problems before closing
 
-def click(identifier, idtype=By.ID):
+def find(identifier, idtype=By.ID):
+    '''
+    find and return an element
+    '''
     if identifier.startswith('/'):
         idtype = By.XPATH
-    try:
-        element = WebDriverWait(DRIVER, ELEMENT_WAIT).until(
-            expected_conditions.presence_of_element_located(
-                (idtype, identifier)
-            )
+    element = WebDriverWait(DRIVER, ELEMENT_WAIT).until(
+        expected_conditions.presence_of_element_located(
+            (idtype, identifier)
         )
+    )
+    return element, idtype
+
+def click(identifier, idtype=By.ID):
+    try:
+        element, idtype = find(identifier, idtype)
         ACTIONS.move_to_element(element).perform()
         element.click()
     except InvalidArgumentException:
