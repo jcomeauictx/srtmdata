@@ -62,7 +62,8 @@ def find(identifier, idtype=By.ID):
         idtype = By.XPATH
     logging.debug('looking for %s, idtype: %s', identifier, idtype)
     element = WebDriverWait(DRIVER, ELEMENT_WAIT).until(
-        expected_conditions.presence_of_element_located(
+        # presence_of_element_located True doesn't mean it's interactable
+        expected_conditions.element_to_be_clickable(
             (idtype, identifier)
         )
     )
