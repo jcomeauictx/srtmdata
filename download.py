@@ -34,13 +34,18 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
         find('//label[text()="SRTM Void Filled"]/../../div/input')  # checkbox
     click('//label[text()="SRTM Void Filled"]/../../div/input')  # check box
     click('//div[@id="tab3" and text()="Additional Criteria"]')
-    find('//div/strong[text()="Resolution"]')
-    find('//div/strong[text()="Resolution"]/..')
-    find('//div/strong[text()="Resolution"]/../..')
-    find('//div/strong[text()="Resolution"]/../../div[2]')
-    find('//div/strong[text()="Resolution"]/../../div[2]//i')
+    if False:
+        find('//div/strong[text()="Resolution"]')
+        find('//div/strong[text()="Resolution"]/..')
+        find('//div/strong[text()="Resolution"]/../..')
+        find('//div/strong[text()="Resolution"]/../../div[2]')
+        find('//div/strong[text()="Resolution"]/../../div[2]//i')
     click('//div/strong[text()="Resolution"]/../../div[2]//i')
+    logging.debug('resolution selectbox should now be visible')
+    time.sleep(10)  # pause for a moment to check
     click('//select/option[3][@value="3-ARC"]/..')  # parent "select"
+    logging.debug('resolution options should now be expanded')
+    time.sleep(10)  # pause for a moment to check
     if '_3arc_' in pattern:
         click('//option[@value="3-ARC"]')
     elif '_1arc_' in pattern:
