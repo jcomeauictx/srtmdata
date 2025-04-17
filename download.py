@@ -55,20 +55,8 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//div[@id="tab2" and text()="Data Sets"]')  # Data Sets tab
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
-    if False:
-        find('//label[text()="SRTM Void Filled"]')
-        find('//label[text()="SRTM Void Filled"]/..')  # containing div
-        find('//label[text()="SRTM Void Filled"]/../..')  # containing span
-        find('//label[text()="SRTM Void Filled"]/../../div')  # span's 1st div
-        find('//label[text()="SRTM Void Filled"]/../../div/input')  # checkbox
     click('//label[text()="SRTM Void Filled"]/../../div/input')  # check box
     click('//div[@id="tab3" and text()="Additional Criteria"]')
-    if False:
-        find('//div/strong[text()="Resolution"]')
-        find('//div/strong[text()="Resolution"]/..')
-        find('//div/strong[text()="Resolution"]/../..')
-        find('//div/strong[text()="Resolution"]/../../div[2]')
-        find('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
     click('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
     logging.debug('resolution selectbox should now be visible')
     select = find('//div[@class="col"]/select/option[3][@value="3-ARC"]/..')[0]
@@ -84,7 +72,8 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
         By.XPATH, '//tr[starts-with(@id, "resultRow_")]'
     )
     for row in rows:
-        logging.debug('row found: %s', row.get_attribute('id'))
+        logging.debug('row found: %s: %s', row.get_attribute('id'),
+                      row.get_attribute('outerHTML'))
     time.sleep(600)  # give developer time to locate problems before closing
 
 def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
