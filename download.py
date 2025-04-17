@@ -89,13 +89,13 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
             )
             ACTIONS.move_to_element(options).perform()
             options.click()
-            # download button is the sibling div preceding "BIL 3 ..."
-            bil = row.find_element(
-                By.XPATH,
-                './/div[@class="name px-0"][contains(text(), "BIL")]/../div[1]'
+            # this brings up a popup window which is a page unto itself
+            # download button is in the sibling div preceding "BIL 3 Arc-..."
+            click(
+                '//div[@class="name px-0"]'
+                '[starts-with(normalize-space(text()), "BIL ")]/'
+                '../div[1]/button'
             )
-            ACTIONS.move_to_element(bil).perform()
-            bil.click()
     time.sleep(600)  # give developer time to locate problems before closing
 
 def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
