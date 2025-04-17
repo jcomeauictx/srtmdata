@@ -83,10 +83,19 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
         check = posixpath.splitext(posixpath.split(src)[1])[0]
         if re.compile(pattern).match(check):
             logging.debug('downloading %s', check)
-            row.find_element('.//a[@class="download"]/div').click()
-            row.find_element(
+            options = row.find_element(
+                By.XPATH,
+                './/a[@class="download"]/div'
+            )
+            ACTIONS.move_to_element(options).perform()
+            options.click()
+            # download button is the sibling div preceding "BIL 3 ..."
+            bil = row.find_element(
+                By.XPATH,
                 './/div[@class="name px-0"][contains(text(), "BIL")]/../div[1]'
-            ).click()
+            )
+            ACTIONS.move_to_element(bil).perform()
+            bil.click()
     time.sleep(600)  # give developer time to locate problems before closing
 
 def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
