@@ -3,6 +3,7 @@
 download all SRTM3 data from USGS
 '''
 import sys, time, netrc, logging  # pylint: disable=multiple-imports
+import posixpath, re  # pylint: disable=multiple-imports
 from shutil import which
 from urllib.parse import urlparse
 from selenium import webdriver
@@ -74,6 +75,14 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     for row in rows:
         logging.debug('row found: %s: %s', row.get_attribute('id'),
                       row.get_attribute('outerHTML'))
+        img = row.find_element(
+            By.XPATH,
+            './td[@class="resultRowBrowse"]/a/img'
+        )
+        src = img.get_attribute('src')
+        check = posixpath.splitext(posixpath.split(src)[1])[0]
+        if re.compile(pattern).match(check):
+            logging.debug('downloading %s', check)
     time.sleep(600)  # give developer time to locate problems before closing
 
 def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
