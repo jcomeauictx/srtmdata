@@ -87,9 +87,9 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
                 By.XPATH,
                 './/a[@class="download"]/div'
             )
-            ACTIONS.move_to_element(options).perform()
             logging.debug('bringing up download options')
-            options.click()
+            ACTIONS.move_to_element(options).perform()
+            #options.click()  # apparently the above statement already clicked
             # this brings up a popup window which is a page unto itself
             # download button is in the sibling div preceding "BIL 3 Arc-..."
             logging.debug('choosing BIL (same as .hgt format)')
