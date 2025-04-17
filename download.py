@@ -83,6 +83,10 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
         check = posixpath.splitext(posixpath.split(src)[1])[0]
         if re.compile(pattern).match(check):
             logging.debug('downloading %s', check)
+            row.find_element('.//a[@class="download"]/div').click()
+            row.find_element(
+                './/div[@class="name px-0"][contains(text(), "BIL")]/../div[1]'
+            ).click()
     time.sleep(600)  # give developer time to locate problems before closing
 
 def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
