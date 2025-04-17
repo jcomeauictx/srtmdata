@@ -30,6 +30,7 @@ CHROMEDRIVER = which('chromedriver')
 SERVICE = Service(executable_path=CHROMEDRIVER)
 DRIVER = webdriver.Chrome(service=SERVICE)
 ELEMENT_WAIT = 10  # default time to wait for element to appear
+DRIVER.implicitly_wait(ELEMENT_WAIT)  # for DRIVER.find_elements
 ACTIONS = ActionChains(DRIVER)
 
 def download(url=WEBSITE, pattern='.*_3arc_'):
@@ -70,7 +71,6 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
         find('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
     click('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
     logging.debug('resolution selectbox should now be visible')
-    time.sleep(10)  # pause for a moment to check
     select = find('//div[@class="col"]/select/option[3][@value="3-ARC"]/..')[0]
     arc = Select(select)
     # preselected default is "All" resolutions
@@ -79,6 +79,12 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     elif '_1arc_' in pattern:
         arc.select_by_value('1-ARC')
     click('//div[@id="tab4" and text()="Results"]')  # Results tab
+    logging.debug('first page of search results should now be showing')
+    rows = DRIVER.find_elements(
+        By.XPATH, '//tr[starts-with(@id, "resultRow_")]'
+    )
+    for row in rows:
+        logging.debug('row found: %s', row.get_attribute('id'))
     time.sleep(600)  # give developer time to locate problems before closing
 
 def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
