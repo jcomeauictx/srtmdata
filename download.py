@@ -82,14 +82,14 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
         src = img.get_attribute('src')
         check = posixpath.splitext(posixpath.split(src)[1])[0]
         if re.compile(pattern).match(check):
-            logging.debug('downloading %s', check)
             options = row.find_element(
                 By.XPATH,
                 './/a[@class="download"]/div'
             )
-            logging.debug('bringing up download options')
+            logging.debug('downloading %s', check)
             ACTIONS.move_to_element(options).perform()
-            #options.click()  # apparently the above statement already clicked
+            logging.debug('bringing up download options')
+            options.click()
             # this brings up a popup window which is a page unto itself
             # download button is in the sibling div preceding "BIL 3 Arc-..."
             logging.debug('choosing BIL (same as .hgt format)')
