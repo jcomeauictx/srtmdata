@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-OPT := # use `-OO` for speed, no debugging output
+OPT := -OO # use `make OPT=-OO` for speed, no debugging output
 PYTHON := python3 $(OPT)
 make.log make.err: .FORCE | download.py
 	set -euxo pipefail; \

@@ -106,7 +106,6 @@ def select(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
                 logging.info('page still stale')
                 time.sleep(1)
     click('//div/input[@title="View Item Basket"]')
-    time.sleep(600)  # give developer time to locate problems before closing
 
 def login(url=WEBSITE):
     '''
@@ -182,12 +181,18 @@ def download(url=WEBSITE):
     download selected SRTM files
     '''
     login(url)
-    link = find('//a[@class="nav-link" and @href="/order/index/"]')[0]
-    count = int(link.find_element('./span').text())
+    time.sleep(3)  # give website a chance to update count after login
+    link = find('//a[normalize-space(@class)="nav-link" and'
+                ' @href="/order/index/"]'
+               )[0]
+    count = int(link.find_element(By.XPATH, './span').text)
     if count > 0:
         link.click()
+        click('//button[text()="Start Order"]')
+        click('//h4/[@title="Click to Expand"]')
     else:
         select(url=url)
+    time.sleep(600)  # give developer time to locate problems before closing
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
