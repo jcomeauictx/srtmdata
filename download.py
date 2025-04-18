@@ -101,7 +101,7 @@ def download(url=WEBSITE, storage=STORAGE, pattern='.*_3arc_'):
                 else:
                     logging.info('%s was already in cart', check)
         page += 1
-        click('//a[@role="button" and starts-with(@text, "Next")]')
+        click('//a[@role="button" and starts-with(text(), "Next ")]')
     click('//div/input[@title="View Item Basket"]')
     time.sleep(600)  # give developer time to locate problems before closing
 
