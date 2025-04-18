@@ -1,9 +1,9 @@
 SHELL := /bin/bash
 OPT := # use `-OO` for speed, no debugging output
 PYTHON := python3 $(OPT)
-download.log: download.py
+download.log: .FORCE | download.py
 	set -euxo pipefail; \
-	{ $(PYTHON) $< 2>&1 1>&3 3>&- | tee $(@:.log=.err); } \
+	{ $(PYTHON) $| 2>&1 1>&3 3>&- | tee $(@:.log=.err); } \
 	 3>&1 1>&2 | tee $@
 %.bil: %_bil.zip
 	unzip -o $<
@@ -14,3 +14,4 @@ move:
 	 mv -f $filename /usr/local/share/gis/hgt/$renamed; \
 	done
 .PRECIOUS: download.log
+.FORCE:

@@ -88,6 +88,7 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
             )
             logging.debug('downloading %s', check)
             ACTIONS.move_to_element(options).perform()
+            time.sleep(10)  # FIXME: artificial delay for debugging
             logging.debug('bringing up download options')
             options.click()
             # this brings up a popup window which is a page unto itself
