@@ -3,7 +3,7 @@
 download all SRTM3 data from USGS
 '''
 import sys, time, netrc, logging  # pylint: disable=multiple-imports
-import posixpath, re  # pylint: disable=multiple-imports
+import os, posixpath, re  # pylint: disable=multiple-imports
 from shutil import which
 from urllib.parse import urlparse
 from selenium import webdriver
@@ -33,8 +33,10 @@ DRIVER = webdriver.Chrome(service=SERVICE)
 ELEMENT_WAIT = 10  # default time to wait for element to appear
 DRIVER.implicitly_wait(ELEMENT_WAIT)  # for DRIVER.find_elements
 ACTIONS = ActionChains(DRIVER)
+STORAGE = os.path.expanduser('~/Documents/srtm')
 
-def download(url=WEBSITE, pattern='.*_3arc_'):
+def download(url=WEBSITE, storage=STORAGE, pattern='.*_3arc_'):
+    os.makedirs(storage, mode=0o755, exist_ok=True)  # make sure it exists
     DRIVER.get(url)
     try:
         click('//a[@href="/login"]', By.XPATH, 0)
@@ -76,6 +78,7 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     page = int(pagination.get_attribute('min'))
     pages = int(pagination.get_attribute('max'))
     while page <= pages:
+        logging.info('processing page %d of %d', page, pages)
         for row in rows:
             logging.info('row found: %s', row.get_attribute('id'))
             logging.debug('row: %s', row.get_attribute('outerHTML'))
@@ -89,10 +92,14 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
                 logging.info('adding %s to bulk download list', check)
                 button = row.find_element(
                     By.XPATH,
-                    './/a[@class="bulk"]/div'
+                    './/a[starts-with(@class,"bulk")]/div'
                 )
                 ACTIONS.move_to_element(button).perform()
-                button.click()
+                if 'selected' not in button.get_attribute('class').split():
+                    button.click()
+                    logging.info('%s added to cart', check)
+                else:
+                    logging.info('%s was already in cart', check)
         page += 1
         click('//a[@role="button" and starts-with(@text, "Next ")]')
     click('//div/input[@title="View Item Basket"]')
