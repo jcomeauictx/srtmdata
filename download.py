@@ -59,7 +59,7 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     click('//label[text()="SRTM Void Filled"]/../../div/input')  # check box
     click('//div[@id="tab3" and text()="Additional Criteria"]')
     click('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
-    logging.debug('resolution selectbox should now be visible')
+    logging.info('resolution selectbox should now be visible')
     select = find('//div[@class="col"]/select/option[3][@value="3-ARC"]/..')[0]
     arc = Select(select)
     # preselected default is "All" resolutions
@@ -68,37 +68,34 @@ def download(url=WEBSITE, pattern='.*_3arc_'):
     elif '_1arc_' in pattern:
         arc.select_by_value('1-ARC')
     click('//div[@id="tab4" and text()="Results"]')  # Results tab
-    logging.debug('first page of search results should now be showing')
+    logging.info('first page of search results should now be showing')
     rows = DRIVER.find_elements(
         By.XPATH, '//tr[starts-with(@id, "resultRow_")]'
     )
-    for row in rows:
-        logging.debug('row found: %s: %s', row.get_attribute('id'),
-                      row.get_attribute('outerHTML'))
-        img = row.find_element(
-            By.XPATH,
-            './td[@class="resultRowBrowse"]/a/img'
-        )
-        src = img.get_attribute('src')
-        check = posixpath.splitext(posixpath.split(src)[1])[0]
-        if re.compile(pattern).match(check):
-            options = row.find_element(
+    pagination = find('//input[@class="pageSelector" and @type="number"]')[0]
+    page = int(pagination.get_attribute('min'))
+    pages = int(pagination.get_attribute('max'))
+    while page <= pages:
+        for row in rows:
+            logging.info('row found: %s', row.get_attribute('id'))
+            logging.debug('row: %s', row.get_attribute('outerHTML'))
+            img = row.find_element(
                 By.XPATH,
-                './/a[@class="download"]/div'
+                './td[@class="resultRowBrowse"]/a/img'
             )
-            logging.debug('downloading %s', check)
-            ACTIONS.move_to_element(options).perform()
-            time.sleep(10)  # FIXME: artificial delay for debugging
-            logging.debug('bringing up download options')
-            #options.click()
-            # this brings up a popup window which is a page unto itself
-            # download button is in the sibling div preceding "BIL 3 Arc-..."
-            logging.debug('choosing BIL (same as .hgt format)')
-            click(
-                '//div[@class="name px-0"]'
-                '[starts-with(normalize-space(text()), "BIL ")]/'
-                '../div[1]/button'
-            )
+            src = img.get_attribute('src')
+            check = posixpath.splitext(posixpath.split(src)[1])[0]
+            if re.compile(pattern).match(check):
+                logging.info('adding %s to bulk download list', check)
+                button = row.find_element(
+                    By.XPATH,
+                    './/a[@class="bulk"]/div'
+                )
+                ACTIONS.move_to_element(button).perform()
+                button.click()
+        page += 1
+        click('//a[@role="button" and starts-with(@text, "Next ")]')
+    click('//div/input[@title="View Item Basket"]')
     time.sleep(600)  # give developer time to locate problems before closing
 
 def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
@@ -107,14 +104,14 @@ def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
     '''
     if identifier.startswith('/'):
         idtype = By.XPATH
-    logging.debug('looking for %s, idtype: %s', identifier, idtype)
+    logging.info('looking for %s, idtype: %s', identifier, idtype)
     element = WebDriverWait(DRIVER, wait).until(
         # presence_of_element_located True doesn't mean it's interactable
         expected_conditions.element_to_be_clickable(
             (idtype, identifier)
         )
     )
-    logging.debug('found: %s: tag=%s, text="%s"', element, element.tag_name,
+    logging.info('found: %s: tag=%s, text="%s"', element, element.tag_name,
                   element.text)
     return element, idtype
 
