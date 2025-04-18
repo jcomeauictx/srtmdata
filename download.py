@@ -13,7 +13,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import InvalidArgumentException, \
-    TimeoutException, ElementClickInterceptedException
+    TimeoutException, ElementClickInterceptedException, \
+    StaleElementReferenceException, WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 
@@ -94,14 +95,28 @@ def download(url=WEBSITE, storage=STORAGE, pattern='.*_3arc_'):
                     By.XPATH,
                     './/a[starts-with(@class,"bulk")]/div'
                 )
+                logging.info('button class: %s', button.get_attribute('class'))
                 ACTIONS.move_to_element(button).perform()
                 if 'selected' not in button.get_attribute('class').split():
                     button.click()
                     logging.info('%s added to cart', check)
                 else:
                     logging.info('%s was already in cart', check)
-        page += 1
         click('//a[@role="button" and starts-with(text(), "Next ")]')
+        while True:
+            logging.debug('waiting for next page to load')
+            try:
+                pagination = find(
+                    '//input[@class="pageSelector" and @type="number"]'
+                )[0]
+                newpage = int(pagination.get_attribute('value'))
+                if newpage == page:
+                    raise StaleElementReferenceException('Same page number')
+                page = newpage
+                break
+            except StaleElementReferenceException:
+                logging.info('page still stale')
+                time.sleep(1)
     click('//div/input[@title="View Item Basket"]')
     time.sleep(600)  # give developer time to locate problems before closing
 
@@ -133,6 +148,11 @@ def click(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
         logging.error('timed out waiting for "%s", %s', identifier, idtype)
     except ElementClickInterceptedException:
         logging.error('element "%s", %s not clickable', identifier, idtype)
+    except StaleElementReferenceException:
+        logging.error('element "%s", %s stale', identifier, idtype)
+    except WebDriverException:
+        logging.error('generic exception for element "%s", %s',
+                      identifier, idtype)
 
 if __name__ == '__main__':
     download(*sys.argv[1:])
