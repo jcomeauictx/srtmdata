@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 OPT := # use `-OO` for speed, no debugging output
 PYTHON := python3 $(OPT)
-download.log: .FORCE | download.py
+make.log make.err: .FORCE | download.py
 	set -euxo pipefail; \
 	{ $(PYTHON) $| 2>&1 1>&3 3>&- | tee $(@:.log=.err); } \
 	 3>&1 1>&2 | tee $@
