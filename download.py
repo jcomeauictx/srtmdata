@@ -6,6 +6,7 @@ import sys, time, netrc, logging  # pylint: disable=multiple-imports
 import os, posixpath, re  # pylint: disable=multiple-imports
 from shutil import which
 from urllib.parse import urlparse
+from glob import glob
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -36,7 +37,7 @@ DRIVER.implicitly_wait(ELEMENT_WAIT)  # for DRIVER.find_elements
 ACTIONS = ActionChains(DRIVER)
 STORAGE = os.path.expanduser('~/Documents/srtm')
 
-def download(url=WEBSITE, storage=STORAGE, pattern='.*_3arc_'):
+def download(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
     os.makedirs(storage, mode=0o755, exist_ok=True)  # make sure it exists
     DRIVER.get(url)
     try:
@@ -72,15 +73,12 @@ def download(url=WEBSITE, storage=STORAGE, pattern='.*_3arc_'):
         arc.select_by_value('1-ARC')
     click('//div[@id="tab4" and text()="Results"]')  # Results tab
     logging.info('first page of search results should now be showing')
-    rows = DRIVER.find_elements(
-        By.XPATH, '//tr[starts-with(@id, "resultRow_")]'
-    )
     pagination = find('//input[@class="pageSelector" and @type="number"]')[0]
     page = int(pagination.get_attribute('min'))
     pages = int(pagination.get_attribute('max'))
     while page <= pages:
         logging.info('processing page %d of %d', page, pages)
-        for row in rows:
+        for row in get_rows():
             logging.info('row found: %s', row.get_attribute('id'))
             logging.debug('row: %s', row.get_attribute('outerHTML'))
             img = row.find_element(
@@ -91,17 +89,21 @@ def download(url=WEBSITE, storage=STORAGE, pattern='.*_3arc_'):
             check = posixpath.splitext(posixpath.split(src)[1])[0]
             if re.compile(pattern).match(check):
                 logging.info('adding %s to bulk download list', check)
-                button = row.find_element(
+                link = row.find_element(
                     By.XPATH,
-                    './/a[starts-with(@class,"bulk")]/div'
+                    './/a[starts-with(@class,"bulk")]'
                 )
-                logging.info('button class: %s', button.get_attribute('class'))
+                button = link.find_element(By.XPATH, './div')
+                logging.info('link class: %s', link.get_attribute('class'))
                 ACTIONS.move_to_element(button).perform()
-                if 'selected' not in button.get_attribute('class').split():
+                if 'selected' not in link.get_attribute('class').split():
                     button.click()
                     logging.info('%s added to cart', check)
                 else:
                     logging.info('%s was already in cart', check)
+            if glob(os.path.join(storage, check + '_bil.zip')):
+                logging.info('%s already downloaded, deselecting')
+                button.click()
         click('//a[@role="button" and starts-with(text(), "Next ")]')
         while True:
             logging.debug('waiting for next page to load')
@@ -153,6 +155,15 @@ def click(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
     except WebDriverException:
         logging.error('generic exception for element "%s", %s',
                       identifier, idtype)
+
+def get_rows():
+    '''
+    load result rows into array
+    '''
+    rows = DRIVER.find_elements(
+        By.XPATH, '//tr[starts-with(@id, "resultRow_")]'
+    )
+    return rows
 
 if __name__ == '__main__':
     download(*sys.argv[1:])
