@@ -189,7 +189,7 @@ def download(url=WEBSITE):
     if count > 0:
         link.click()
         click('//button[text()="Start Order"]')
-        click('//h4/[@title="Click to Expand"]')
+        click('//h4/i[@title="Click to Expand"]')
     else:
         select(url=url)
     time.sleep(600)  # give developer time to locate problems before closing
