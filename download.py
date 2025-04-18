@@ -37,26 +37,12 @@ DRIVER.implicitly_wait(ELEMENT_WAIT)  # for DRIVER.find_elements
 ACTIONS = ActionChains(DRIVER)
 STORAGE = os.path.expanduser('~/Documents/srtm')
 
-def download(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
+def select(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
+    '''
+    select desired SRTM quadrants
+    '''
+    login(url)
     os.makedirs(storage, mode=0o755, exist_ok=True)  # make sure it exists
-    DRIVER.get(url)
-    try:
-        click('//a[@href="/login"]', By.XPATH, 0)
-        if not AUTHDATA:
-            logging.info('waiting a bit for you to login manually')
-            time.sleep(60)
-        else:
-            formfield = find('//form[@id="loginForm"]//input[@name="username"]')
-            formfield[0].send_keys(AUTHDATA[0])
-            formfield = find('//form[@id="loginForm"]//input[@name="password"]')
-            formfield[0].send_keys(AUTHDATA[2])
-            click('//input[@id="loginButton"]')
-    except TimeoutException:
-        logging.info('no login button, assuming already logged in')
-    logged_in = find('//a[@href="/logout/"]')
-    if not logged_in:
-        logging.error('cannot download SRTM data without logging in')
-        sys.exit(1)
     click('//div[@id="tab2" and text()="Data Sets"]')  # Data Sets tab
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
@@ -122,6 +108,29 @@ def download(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
     click('//div/input[@title="View Item Basket"]')
     time.sleep(600)  # give developer time to locate problems before closing
 
+def login(url=WEBSITE):
+    '''
+    login to earthexplorer.usgs.gov
+    '''
+    DRIVER.get(url)
+    try:
+        click('//a[@href="/login"]', By.XPATH, 0)
+        if not AUTHDATA:
+            logging.info('waiting a bit for you to login manually')
+            time.sleep(60)
+        else:
+            formfield = find('//form[@id="loginForm"]//input[@name="username"]')
+            formfield[0].send_keys(AUTHDATA[0])
+            formfield = find('//form[@id="loginForm"]//input[@name="password"]')
+            formfield[0].send_keys(AUTHDATA[2])
+            click('//input[@id="loginButton"]')
+    except TimeoutException:
+        logging.info('no login button, assuming already logged in')
+    logged_in = find('//a[@href="/logout/"]')
+    if not logged_in:
+        logging.error('cannot download SRTM data without logging in')
+        sys.exit(1)
+
 def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
     '''
     find and return an element
@@ -140,6 +149,9 @@ def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
     return element, idtype
 
 def click(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
+    '''
+    click specified element
+    '''
     try:
         element, idtype = find(identifier, idtype, wait)
         ACTIONS.move_to_element(element).perform()
@@ -165,7 +177,23 @@ def get_rows():
     )
     return rows
 
+def download(url=WEBSITE):
+    '''
+    download selected SRTM files
+    '''
+    login(url)
+    link = find('//a[@class="nav-link" and @href="/order/index/"]')[0]
+    count = int(link.find_element('./span').text())
+    if count > 0:
+        link.click()
+    else:
+        select(url=url)
+
 if __name__ == '__main__':
-    download(*sys.argv[1:])
+    if len(sys.argv) > 1:
+        SUBCOMMAND, ARGS = sys.argv[1], sys.argv[2:]
+        eval(SUBCOMMAND)(*ARGS)
+    else:
+        download()
 
 # vim: tabstop=8 expandtab softtabstop=4 shiftwidth=4
