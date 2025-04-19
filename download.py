@@ -198,7 +198,7 @@ def download(url=WEBSITE):
         for button in buttons:
             logging.debug(button.get_attribute('outerHTML').replace('\n', ' '))
         page = int(find(
-            '//button[contains(@class,"currentPage") and @disabled]'
+            '//button[contains(@class,"currentPage")]'
         )[0].get_attribute('value'))
         pages = int(find(
             '//button[contains(@class, " paginationButton") and'
@@ -227,7 +227,7 @@ def download(url=WEBSITE):
                 logging.debug('waiting for next page to load')
                 try:
                     newpage = int(find(
-                        '//button[contains(@class,"currentPage") and @disabled]'
+                        '//button[contains(@class,"currentPage")]'
                     )[0].get_attribute('value'))
                     if newpage == page:
                         raise StaleElementReferenceException('Same page number')
