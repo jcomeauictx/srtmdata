@@ -241,25 +241,30 @@ def download(url=WEBSITE):
                 )
                 ACTIONS.move_to_element(selector).perform()
                 selector.click()
-            click('//button[contains(@class, " paginationButton") and'
-                  ' starts-with(normalize-space(text()), "Next ")]')
-            time.sleep(7)  # let next page start loading
-            while True:
-                logging.debug('waiting for next page to load')
-                try:
-                    newpage = int(findonly(
-                        '//button[contains(@class,"currentPage")]'
-                    ).get_attribute('value'))
-                    if newpage == page:
-                        raise StaleElementReferenceException('Same page number')
-                    page = newpage
-                    break
-                except (TimeoutException, StaleElementReferenceException):
-                    logging.info('page still stale')
-                    time.sleep(1)
+            if page < pages:
+                click('//button[contains(@class, " paginationButton") and'
+                      ' starts-with(normalize-space(text()), "Next ")]')
+                time.sleep(7)  # let next page start loading
+                while True:
+                    logging.debug('waiting for next page to load')
+                    try:
+                        newpage = int(findonly(
+                            '//button[contains(@class,"currentPage")]'
+                        ).get_attribute('value'))
+                        if newpage == page:
+                            raise StaleElementReferenceException(
+                                'Same page number'
+                            )
+                        page = newpage
+                        break
+                    except (TimeoutException, StaleElementReferenceException):
+                        logging.info('page still stale')
+                        time.sleep(1)
+        click('//*[normalize-space(text())="Submit Product Selections"]')
     else:
         select(url=url)
-    time.sleep(600)  # give developer time to locate problems before closing
+    while True:
+        time.sleep(600)  # wait until user closes window
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
