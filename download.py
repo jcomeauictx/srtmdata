@@ -192,10 +192,9 @@ def download(url=WEBSITE):
         click('//h4/i[@title="Click to Expand"]')
         page = 1
         pages = int(find(
-            By.XPATH,
-            '//button[ends-with(@class, " paginationButton") and'
+            '//button[contains(@class, "paginationButton") and'
             ' starts-with(text(), "Last ")]'
-        ).get_attribute('page'))
+        )[0].get_attribute('page'))
         while page <= pages:
             rows = DRIVER.find_elements(
                 By.XPATH,
