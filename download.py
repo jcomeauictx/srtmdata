@@ -66,7 +66,10 @@ def select(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
         logging.info('processing page %d of %d', page, pages)
         for row in get_rows():
             logging.info('row found: %s', row.get_attribute('id'))
-            logging.debug('row: %s', row.get_attribute('outerHTML'))
+            logging.debug(
+                'row: %s',
+                row.get_attribute('outerHTML').replace('\n', ' ')
+            )
             img = row.find_element(
                 By.XPATH,
                 './td[@class="resultRowBrowse"]/a/img'
@@ -191,8 +194,11 @@ def download(url=WEBSITE):
         click('//button[text()="Start Order"]')
         click('//h4/i[@title="Click to Expand"]')
         time.sleep(7)  # takes a while to expand the list (about 5s)
+        buttons = DRIVER.find_elements(By.XPATH, '//button')
+        for button in buttons:
+            logging.debug(button.get_attribute('outerHTML').replace('\n', ' '))
         page = int(find(
-            '//button[contains(@class," currentPage")]'
+            '//button[contains(@class,"currentPage") and @disabled]'
         )[0].get_attribute('value'))
         pages = int(find(
             '//button[contains(@class, " paginationButton") and'
@@ -204,7 +210,10 @@ def download(url=WEBSITE):
                 '//div[@class="sceneContainer row"]'
             )
             for row in rows:
-                logging.debug('row: %s', row.get_attribute('outerHTML'))
+                logging.debug(
+                    'row: %s',
+                    row.get_attribute('outerHTML').replace('\n', ' ')
+                )
                 selector = row.find_element(
                     By.XPATH,
                     './/select/option[contains(text(), "BIL")]'
@@ -218,7 +227,7 @@ def download(url=WEBSITE):
                 logging.debug('waiting for next page to load')
                 try:
                     newpage = int(find(
-                        '//button[contains(@class," currentPage")]'
+                        '//button[contains(@class,"currentPage") and @disabled]'
                     )[0].get_attribute('value'))
                     if newpage == page:
                         raise StaleElementReferenceException('Same page number')
