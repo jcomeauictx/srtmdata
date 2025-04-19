@@ -226,6 +226,7 @@ def download(url=WEBSITE):
             ' starts-with(normalize-space(text()), "Last ")]'
         ).get_attribute('page'))
         while page <= pages:
+            logging.info('processing download page %d of %d', page, pages)
             rows = DRIVER.find_elements(
                 By.XPATH,
                 '//div[@class="sceneContainer row"]'
