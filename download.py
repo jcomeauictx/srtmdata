@@ -148,8 +148,8 @@ def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
     logging.info('looking for %s, idtype: %s', identifier, idtype)
     try:
         element = WebDriverWait(DRIVER, wait).until(
-            # presence_of_element_located True doesn't mean it's interactable
-            expected_conditions.element_to_be_clickable(
+            # NOTE: presence_of_element_located doesn't mean it's interactable
+            expected_conditions.presence_of_element_located(
                 (idtype, identifier)
             )
         )
@@ -173,6 +173,11 @@ def click(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
     try:
         element, idtype = find(identifier, idtype, wait)
         ACTIONS.move_to_element(element).perform()
+        WebDriverWait(DRIVER, wait).until(
+            expected_conditions.element_to_be_clickable(
+                (idtype, identifier)
+            )
+        )
         element.click()
     except InvalidArgumentException:
         logging.error('invalid argument "%s", %s', identifier, idtype)
@@ -214,7 +219,7 @@ def download(url=WEBSITE):
         for button in buttons:
             logging.debug(button.get_attribute('outerHTML').replace('\n', ' '))
         page = int(findonly(
-            '//button[@class="btn btn-dark currentPage"]'
+            '//button[contains(@class,"currentPage")]'
         ).get_attribute('value'))
         pages = int(findonly(
             '//button[contains(@class, " paginationButton") and'
@@ -243,7 +248,7 @@ def download(url=WEBSITE):
                 logging.debug('waiting for next page to load')
                 try:
                     newpage = int(findonly(
-                        '//button[@class="btn btn-dark currentPage"]'
+                        '//button[contains(@class,"currentPage")]'
                     ).get_attribute('value'))
                     if newpage == page:
                         raise StaleElementReferenceException('Same page number')
