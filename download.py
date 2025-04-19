@@ -191,7 +191,9 @@ def download(url=WEBSITE):
         click('//button[text()="Start Order"]')
         click('//h4/i[@title="Click to Expand"]')
         time.sleep(7)  # takes a while to expand the list (about 5s)
-        page = 1
+        page = int(find(
+            '//button[contains(@class," currentPage")]'
+        )[0].get_attribute('value'))
         pages = int(find(
             '//button[contains(@class, " paginationButton") and'
             ' starts-with(normalize-space(text()), "Last ")]'
@@ -211,18 +213,18 @@ def download(url=WEBSITE):
                 selector.click()
             click('//button[contains(@class, " paginationButton") and'
                   ' starts-with(normalize-space(text()), "Next ")]')
+            time.sleep(7)  # let next page start loading
             while True:
                 logging.debug('waiting for next page to load')
                 try:
-                    pagination = find(
+                    newpage = int(find(
                         '//button[contains(@class," currentPage")]'
-                    )[0]
-                    newpage = int(pagination.get_attribute('value'))
+                    )[0].get_attribute('value'))
                     if newpage == page:
                         raise StaleElementReferenceException('Same page number')
                     page = newpage
                     break
-                except StaleElementReferenceException:
+                except (TimeoutException, StaleElementReferenceException):
                     logging.info('page still stale')
                     time.sleep(1)
     else:
