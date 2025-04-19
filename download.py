@@ -190,11 +190,11 @@ def download(url=WEBSITE):
         link.click()
         click('//button[text()="Start Order"]')
         click('//h4/i[@title="Click to Expand"]')
-        time.sleep(300)  # takes a while to expand the list (about 5s)
+        time.sleep(7)  # takes a while to expand the list (about 5s)
         page = 1
         pages = int(find(
             '//button[contains(@class, " paginationButton") and'
-            ' starts-with(text(), "Last ")]'
+            ' starts-with(normalize-space(text()), "Last ")]'
         )[0].get_attribute('page'))
         while page <= pages:
             rows = DRIVER.find_elements(
@@ -209,7 +209,7 @@ def download(url=WEBSITE):
                 ACTIONS.move_to_element(selector).perform()
                 selector.click()
             click('//button[contains(@class, " paginationButton") and'
-                  ' starts-with(text(), "Next ")]')
+                  ' starts-with(normalize-space(text()), "Next ")]')
             while True:
                 logging.debug('waiting for next page to load')
                 try:
