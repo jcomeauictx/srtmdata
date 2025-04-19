@@ -199,12 +199,13 @@ def download(url=WEBSITE):
         while page <= pages:
             rows = DRIVER.find_elements(
                 By.XPATH,
-                '//div[@class="datasetHeading row"]'
+                '//div[@class="sceneContainer row"]'
             )
             for row in rows:
+                logging.debug('row: %s', row.get_attribute('outerHTML'))
                 selector = row.find_element(
                     By.XPATH,
-                    './/select/option[starts-with(text(), "BIL ")]'
+                    './/select/option[contains(text(), "BIL")]'
                 )
                 ACTIONS.move_to_element(selector).perform()
                 selector.click()
@@ -214,7 +215,7 @@ def download(url=WEBSITE):
                 logging.debug('waiting for next page to load')
                 try:
                     pagination = find(
-                        '//button[contains(@class," currentPage")'
+                        '//button[contains(@class," currentPage")]'
                     )[0]
                     newpage = int(pagination.get_attribute('value'))
                     if newpage == page:
