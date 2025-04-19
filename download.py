@@ -50,7 +50,9 @@ def select(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
     click('//div[@id="tab3" and text()="Additional Criteria"]')
     click('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
     logging.info('resolution selectbox should now be visible')
-    select = find('//div[@class="col"]/select/option[3][@value="3-ARC"]/..')[0]
+    select = findonly(
+        '//div[@class="col"]/select/option[3][@value="3-ARC"]/..'
+    )
     arc = Select(select)
     # preselected default is "All" resolutions
     if '_3arc_' in pattern:
@@ -59,7 +61,7 @@ def select(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
         arc.select_by_value('1-ARC')
     click('//div[@id="tab4" and text()="Results"]')  # Results tab
     logging.info('first page of search results should now be showing')
-    pagination = find('//input[@class="pageSelector" and @type="number"]')[0]
+    pagination = findonly('//input[@class="pageSelector" and @type="number"]')
     page = int(pagination.get_attribute('min'))
     pages = int(pagination.get_attribute('max'))
     while page <= pages:
@@ -97,9 +99,9 @@ def select(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
         while True:
             logging.debug('waiting for next page to load')
             try:
-                pagination = find(
+                pagination = findonly(
                     '//input[@class="pageSelector" and @type="number"]'
-                )[0]
+                )
                 newpage = int(pagination.get_attribute('value'))
                 if newpage == page:
                     raise StaleElementReferenceException('Same page number')
@@ -121,14 +123,18 @@ def login(url=WEBSITE):
             logging.info('waiting a bit for you to login manually')
             time.sleep(60)
         else:
-            formfield = find('//form[@id="loginForm"]//input[@name="username"]')
-            formfield[0].send_keys(AUTHDATA[0])
-            formfield = find('//form[@id="loginForm"]//input[@name="password"]')
-            formfield[0].send_keys(AUTHDATA[2])
+            formfield = findonly(
+                '//form[@id="loginForm"]//input[@name="username"]'
+            )
+            formfield.send_keys(AUTHDATA[0])
+            formfield = findonly(
+                '//form[@id="loginForm"]//input[@name="password"]'
+            )
+            formfield.send_keys(AUTHDATA[2])
             click('//input[@id="loginButton"]')
     except TimeoutException:
         logging.info('no login button, assuming already logged in')
-    logged_in = find('//a[@href="/logout/"]')
+    logged_in = findonly('//a[@href="/logout/"]')
     if not logged_in:
         logging.error('cannot download SRTM data without logging in')
         sys.exit(1)
@@ -140,15 +146,25 @@ def find(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
     if identifier.startswith('/'):
         idtype = By.XPATH
     logging.info('looking for %s, idtype: %s', identifier, idtype)
-    element = WebDriverWait(DRIVER, wait).until(
-        # presence_of_element_located True doesn't mean it's interactable
-        expected_conditions.element_to_be_clickable(
-            (idtype, identifier)
+    try:
+        element = WebDriverWait(DRIVER, wait).until(
+            # presence_of_element_located True doesn't mean it's interactable
+            expected_conditions.element_to_be_clickable(
+                (idtype, identifier)
+            )
         )
-    )
-    logging.info('found: %s: tag=%s, text="%s"', element, element.tag_name,
-                  element.text)
+        logging.info('found: %s: tag=%s, text="%s"', element, element.tag_name,
+                      element.text)
+    except TimeoutException:
+        logging.error('`find` timed out')
+        element = None
     return element, idtype
+
+def findonly(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
+    '''
+    like `find` but returns only the element, not the idtype
+    '''
+    return find(identifier, idtype, wait)[0]
 
 def click(identifier, idtype=By.ID, wait=ELEMENT_WAIT):
     '''
@@ -185,9 +201,9 @@ def download(url=WEBSITE):
     '''
     login(url)
     time.sleep(3)  # give website a chance to update count after login
-    link = find('//a[normalize-space(@class)="nav-link" and'
-                ' @href="/order/index/"]'
-               )[0]
+    link = findonly(
+        '//a[normalize-space(@class)="nav-link" and @href="/order/index/"]'
+    )
     count = int(link.find_element(By.XPATH, './span').text)
     if count > 0:
         link.click()
@@ -197,13 +213,13 @@ def download(url=WEBSITE):
         buttons = DRIVER.find_elements(By.XPATH, '//button')
         for button in buttons:
             logging.debug(button.get_attribute('outerHTML').replace('\n', ' '))
-        page = int(find(
-            '//button[contains(@class,"currentPage")]'
-        )[0].get_attribute('value'))
-        pages = int(find(
+        page = int(findonly(
+            '//button[@class="btn btn-dark currentPage"]'
+        ).get_attribute('value'))
+        pages = int(findonly(
             '//button[contains(@class, " paginationButton") and'
             ' starts-with(normalize-space(text()), "Last ")]'
-        )[0].get_attribute('page'))
+        ).get_attribute('page'))
         while page <= pages:
             rows = DRIVER.find_elements(
                 By.XPATH,
@@ -226,9 +242,9 @@ def download(url=WEBSITE):
             while True:
                 logging.debug('waiting for next page to load')
                 try:
-                    newpage = int(find(
-                        '//button[contains(@class,"currentPage")]'
-                    )[0].get_attribute('value'))
+                    newpage = int(findonly(
+                        '//button[@class="btn btn-dark currentPage"]'
+                    ).get_attribute('value'))
                     if newpage == page:
                         raise StaleElementReferenceException('Same page number')
                     page = newpage
