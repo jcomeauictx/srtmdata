@@ -275,6 +275,8 @@ def store(zipped, storage=STORAGE):
     STORAGE should ideally be owned by a user (you). this routine will
     attempt to create a subdirectory, srtm1 or srtm3, appropriate to the
     data being written, and a subsubdir to limit the number of files in each
+
+    return is a *count*! a 1 does not indicate failure.
     '''
     pieces = os.path.splitext(os.path.basename(zipped))[0].split('_')
     logging.debug('pieces: %s', pieces)
@@ -286,11 +288,24 @@ def store(zipped, storage=STORAGE):
     outfile = os.path.join(
         storage, srtm, subsubdir, ''.join(pieces[:2]).upper() + '.hgt'
     )
+    if os.path.exists(outfile):
+        return 0  # don't overwrite
     os.makedirs(os.path.dirname(outfile), mode=0o755, exist_ok=True)
     with zipfile.ZipFile(zipped) as archive:
         with archive.open(infile) as zipdata, open(outfile, 'wb') as hgtdata:
             logging.debug('writing %s', outfile)
             hgtdata.write(zipdata.read())
+    return 1
+
+def store_all(tempstore=TEMPSTORE, storage=STORAGE):
+    '''
+    save all BIL data in permanent storage location
+    '''
+    zipfiles = glob(os.path.join(tempstore, '*_v2_bil.zip'))
+    stored = 0
+    for zipped in zipfiles:
+        stored += store(zipped)
+    logging.info('stored %d hgt files', stored)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
