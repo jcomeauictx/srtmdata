@@ -93,12 +93,16 @@ def select(pattern='.*_3arc_', tempstore=TEMPSTORE, url=WEBSITE):
                     logging.info('%s added to cart', check)
                 else:
                     logging.info('%s was already in cart', check)
-            zipglob = os.path.join(tempstore, check + '_bil.zip')
-            if glob(zipglob):
-                logging.info('%s already downloaded, deselecting', check)
-                button.click()
+                zipglob = os.path.join(tempstore, check + '_bil.zip')
+                if glob(zipglob):
+                    logging.info('%s already downloaded, deselecting', check)
+                    button.click()
+                else:
+                    logging.info(
+                        'verified %s does not already exist', zipglob
+                    )
             else:
-                logging.info('verified %s does not already exist', zipglob)
+                logging.info('%s does not match pattern "%s"', check, pattern)
         click('//a[@role="button" and starts-with(text(), "Next ")]')
         while True:
             logging.debug('waiting for next page to load')
