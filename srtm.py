@@ -87,22 +87,21 @@ def select(pattern='.*_3arc_', tempstore=TEMPSTORE, url=WEBSITE):
                 )
                 button = link.find_element(By.XPATH, './div')
                 logging.info('link class: %s', link.get_attribute('class'))
-                ACTIONS.move_to_element(button).perform()
-                if 'selected' not in link.get_attribute('class').split():
-                    button.click()
-                    logging.info('%s added to cart', check)
-                else:
-                    logging.info('%s was already in cart', check)
                 zipglob = os.path.join(tempstore, check + '_bil.zip')
                 if glob(zipglob):
                     logging.info(
-                        '%s already saved, removing from cart', check
+                        '%s already saved, not adding to cart', zipglob
                     )
-                    button.click()
                 else:
                     logging.info(
-                        'verified %s not already in cart', zipglob
+                        'verified %s not already downloaded', zipglob
                     )
+                    ACTIONS.move_to_element(button).perform()
+                    if 'selected' not in link.get_attribute('class').split():
+                        button.click()
+                        logging.info('%s added to cart', check)
+                    else:
+                        logging.info('%s was already in cart', check)
             else:
                 logging.info('%s does not match pattern "%s"', check, pattern)
         if page < pages:
