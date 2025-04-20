@@ -1,6 +1,8 @@
 SHELL := /bin/bash
 OPT := -OO # use `make OPT=-OO` for speed, no debugging output
 PYTHON := python3 $(OPT)
+STORAGE ?= /usr/local/share/gis/srtm
+DRYRUN ?= --dry-run
 make.log: .FORCE | srtm.py
 	set -euxo pipefail; \
 	{ $(PYTHON) $| 2>&1 1>&3 3>&- | tee $(@:.log=.err); } \
@@ -12,6 +14,10 @@ move:
 	for filename in *.bil; do \
 	 renamed=$(echo $filename | tr -d _ | tr nsew NSEW | cut -c1-7).hgt; \
 	 mv -f $filename /usr/local/share/gis/hgt/$renamed; \
+	done
+upload:
+	for host in srtm1 srtm2; do \
+	 cd $(STORAGE) && rsync -avuz $(DRYRUN) . $$host:$(STORAGE)/; \
 	done
 .PRECIOUS: make.log
 .FORCE:
