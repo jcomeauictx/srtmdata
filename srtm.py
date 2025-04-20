@@ -66,7 +66,7 @@ def select(pattern='.*_3arc_', tempstore=TEMPSTORE, url=WEBSITE):
     page = int(pagination.get_attribute('min'))
     pages = int(pagination.get_attribute('max'))
     while page <= pages:
-        logging.info('processing page %d of %d', page, pages)
+        logging.info('processing selection page %d of %d', page, pages)
         for row in get_rows():
             logging.info('row found: %s', row.get_attribute('id'))
             logging.debug(
@@ -95,29 +95,34 @@ def select(pattern='.*_3arc_', tempstore=TEMPSTORE, url=WEBSITE):
                     logging.info('%s was already in cart', check)
                 zipglob = os.path.join(tempstore, check + '_bil.zip')
                 if glob(zipglob):
-                    logging.info('%s already downloaded, deselecting', check)
+                    logging.info(
+                        '%s already saved, removing from cart', check
+                    )
                     button.click()
                 else:
                     logging.info(
-                        'verified %s does not already exist', zipglob
+                        'verified %s not already in cart', zipglob
                     )
             else:
                 logging.info('%s does not match pattern "%s"', check, pattern)
-        click('//a[@role="button" and starts-with(text(), "Next ")]')
-        while True:
-            logging.debug('waiting for next page to load')
-            try:
-                pagination = findonly(
-                    '//input[@class="pageSelector" and @type="number"]'
-                )
-                newpage = int(pagination.get_attribute('value'))
-                if newpage == page:
-                    raise StaleElementReferenceException('Same page number')
-                page = newpage
-                break
-            except StaleElementReferenceException:
-                logging.info('page still stale')
-                time.sleep(1)
+        if page < pages:
+            click('//a[@role="button" and starts-with(text(), "Next ")]')
+            while True:
+                logging.debug('waiting for next page to load')
+                try:
+                    pagination = findonly(
+                        '//input[@class="pageSelector" and @type="number"]'
+                    )
+                    newpage = int(pagination.get_attribute('value'))
+                    if newpage == page:
+                        raise StaleElementReferenceException('Same page number')
+                    page = newpage
+                    break
+                except StaleElementReferenceException:
+                    logging.info('page still stale')
+                    time.sleep(1)
+        else:
+            break  # don't keep looping over final page
     click('//div/input[@title="View Item Basket"]')
 
 def login(url=WEBSITE):
@@ -269,6 +274,8 @@ def download(url=WEBSITE):
                     except (TimeoutException, StaleElementReferenceException):
                         logging.info('page still stale')
                         time.sleep(1)
+            else:
+                break  # don't keep looping over final page
         click('//*[normalize-space(text())="Submit Product Selections"]')
     else:
         select(url=url)
