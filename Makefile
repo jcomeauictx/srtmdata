@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 OPT := -OO # use `make OPT=-OO` for speed, no debugging output
 PYTHON := python3 $(OPT)
-make.log make.err: .FORCE | download.py
+make.log make.err: .FORCE | srtm.py
 	set -euxo pipefail; \
 	{ $(PYTHON) $| 2>&1 1>&3 3>&- | tee $(@:.log=.err); } \
 	 3>&1 1>&2 | tee $@
@@ -13,5 +13,5 @@ move:
 	 renamed=$(echo $filename | tr -d _ | tr nsew NSEW | cut -c1-7).hgt; \
 	 mv -f $filename /usr/local/share/gis/hgt/$renamed; \
 	done
-.PRECIOUS: download.log
+.PRECIOUS: make.log
 .FORCE:
