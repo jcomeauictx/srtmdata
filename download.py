@@ -3,7 +3,7 @@
 download all SRTM3 data from USGS
 '''
 import sys, time, netrc, logging  # pylint: disable=multiple-imports
-import os, posixpath, re  # pylint: disable=multiple-imports
+import os, posixpath, re, zipfile  # pylint: disable=multiple-imports
 from shutil import which
 from urllib.parse import urlparse
 from glob import glob
@@ -35,14 +35,15 @@ DRIVER = webdriver.Chrome(service=SERVICE)
 ELEMENT_WAIT = 10  # default time to wait for element to appear
 DRIVER.implicitly_wait(ELEMENT_WAIT)  # for DRIVER.find_elements
 ACTIONS = ActionChains(DRIVER)
-STORAGE = os.path.expanduser('~/Documents/srtm')
+TEMPSTORE = os.path.expanduser('~/Documents/srtm')
+STORAGE = '/usr/local/share/gis/srtm'  # subdirectories srtm1 and srtm3
 
-def select(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
+def select(pattern='.*_3arc_', tempstore=TEMPSTORE, url=WEBSITE):
     '''
     select desired SRTM quadrants
     '''
     login(url)
-    os.makedirs(storage, mode=0o755, exist_ok=True)  # make sure it exists
+    os.makedirs(tempstore, mode=0o755, exist_ok=True)  # make sure it exists
     click('//div[@id="tab2" and text()="Data Sets"]')  # Data Sets tab
     click('//li[@id="cat_207"]//span/div/strong[text()="Digital Elevation"]')
     click('//li[@id="cat_1103"]//span/div/strong[text()="SRTM"]')
@@ -92,7 +93,7 @@ def select(pattern='.*_3arc_', storage=STORAGE, url=WEBSITE):
                     logging.info('%s added to cart', check)
                 else:
                     logging.info('%s was already in cart', check)
-            if glob(os.path.join(storage, check + '_bil.zip')):
+            if glob(os.path.join(tempstore, check + '_bil.zip')):
                 logging.info('%s already downloaded, deselecting')
                 button.click()
         click('//a[@role="button" and starts-with(text(), "Next ")]')
@@ -266,6 +267,30 @@ def download(url=WEBSITE):
         select(url=url)
     while True:
         time.sleep(600)  # wait until user closes window
+
+def store(zipped, storage=STORAGE):
+    '''
+    unzip n00_w000_3arc_v2_bil.zip and store as STORAGE/srtm3/N00/N00W000.hgt
+
+    STORAGE should ideally be owned by a user (you). this routine will
+    attempt to create a subdirectory, srtm1 or srtm3, appropriate to the
+    data being written, and a subsubdir to limit the number of files in each
+    '''
+    pieces = os.path.splitext(os.path.basename(zipped))[0].split('_')
+    logging.debug('pieces: %s', pieces)
+    mapping = {'1arc': 'srtm1', '3arc': 'srtm3'}
+    logging.debug('mapping: %s, key: "%s"', mapping, pieces[2])
+    srtm = mapping[pieces[2]]
+    subsubdir = pieces[0].upper()
+    infile = '_'.join(pieces[:4]) + '.bil'
+    outfile = os.path.join(
+        storage, srtm, subsubdir, ''.join(pieces[:2]).upper() + '.hgt'
+    )
+    os.makedirs(os.path.dirname(outfile), mode=0o755, exist_ok=True)
+    with zipfile.ZipFile(zipped) as archive:
+        with archive.open(infile) as zipdata, open(outfile, 'wb') as hgtdata:
+            logging.debug('writing %s', outfile)
+            hgtdata.write(zipdata.read())
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
