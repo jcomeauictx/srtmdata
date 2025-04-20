@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 OPT := -OO # use `make OPT=-OO` for speed, no debugging output
 PYTHON := python3 $(OPT)
-make.log make.err: .FORCE | srtm.py
+make.log: .FORCE | srtm.py
 	set -euxo pipefail; \
 	{ $(PYTHON) $| 2>&1 1>&3 3>&- | tee $(@:.log=.err); } \
 	 3>&1 1>&2 | tee $@
