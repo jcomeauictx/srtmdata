@@ -289,6 +289,7 @@ def store(zipped, storage=STORAGE):
         storage, srtm, subsubdir, ''.join(pieces[:2]).upper() + '.hgt'
     )
     if os.path.exists(outfile):
+        logging.debug('skipping existing %s', outfile)
         return 0  # don't overwrite
     os.makedirs(os.path.dirname(outfile), mode=0o755, exist_ok=True)
     with zipfile.ZipFile(zipped) as archive:
