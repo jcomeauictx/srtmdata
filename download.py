@@ -279,9 +279,9 @@ def store(zipped, storage=STORAGE):
     return is a *count*! a 1 does not indicate failure.
     '''
     pieces = os.path.splitext(os.path.basename(zipped))[0].split('_')
-    logging.debug('pieces: %s', pieces)
+    #logging.debug('pieces: %s', pieces)
     mapping = {'1arc': 'srtm1', '3arc': 'srtm3'}
-    logging.debug('mapping: %s, key: "%s"', mapping, pieces[2])
+    #logging.debug('mapping: %s, key: "%s"', mapping, pieces[2])
     srtm = mapping[pieces[2]]
     subsubdir = pieces[0].upper()
     infile = '_'.join(pieces[:4]) + '.bil'
