@@ -312,7 +312,7 @@ def store(zipped, storage=STORAGE):
             hgtdata.write(zipdata.read())
     return 1
 
-def store_all(tempstore=TEMPSTORE, storage=STORAGE):
+def store_all(tempstore=TEMPSTORE, storage=STORAGE, url=WEBSITE):
     '''
     save all BIL data in permanent storage location
     '''
@@ -321,12 +321,14 @@ def store_all(tempstore=TEMPSTORE, storage=STORAGE):
     for zipped in zipfiles:
         stored += store(zipped)
     logging.info('stored %d hgt files', stored)
+    if stored == 0:
+        download(url)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         SUBCOMMAND, ARGS = sys.argv[1], sys.argv[2:]
         eval(SUBCOMMAND)(*ARGS)
     else:
-        download()
+        store_all()
 
 # vim: tabstop=8 expandtab softtabstop=4 shiftwidth=4
