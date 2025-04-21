@@ -86,7 +86,7 @@ def select(#pylint:disable=too-many-locals,too-many-branches,too-many-statements
             src = img.get_attribute('src')
             check = posixpath.splitext(posixpath.split(src)[1])[0]
             if re.compile(pattern).match(check):
-                logging.info('adding %s to bulk download list', check)
+                logging.info('%s matches SRTM pattern', check)
                 link = row.find_element(
                     By.XPATH,
                     './/a[starts-with(@class,"bulk")]'
