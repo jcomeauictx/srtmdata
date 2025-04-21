@@ -31,13 +31,13 @@ except (FileNotFoundError, ValueError) as noauth:
     logging.error('netrc failed, must log in via browser to download data: %s',
                   noauth)
 CHROMEDRIVER = which('chromedriver')
-SERVICE = Service(executable_path=CHROMEDRIVER)
-DRIVER = webdriver.Chrome(service=SERVICE)
 ELEMENT_WAIT = 10  # default time to wait for element to appear
-DRIVER.implicitly_wait(ELEMENT_WAIT)  # for DRIVER.find_elements
-ACTIONS = ActionChains(DRIVER)
 TEMPSTORE = os.path.expanduser('~/Documents/srtm')
 STORAGE = '/usr/local/share/gis/srtm'  # subdirectories srtm1 and srtm3
+# the following will be redefined in `if __name__ == '__main__'` clause below
+SERVICE = None
+DRIVER = None
+ACTIONS = None
 
 def select(#pylint:disable=too-many-locals,too-many-branches,too-many-statements
         pattern='.*_3arc_',
@@ -328,6 +328,11 @@ def store_all(tempstore=TEMPSTORE, storage=STORAGE, url=WEBSITE):
         download(url)
 
 if __name__ == '__main__':
+    if len(sys.argv) < 2 or sys.argv[1] in ('select', 'download'):
+        SERVICE = Service(executable_path=CHROMEDRIVER)
+        DRIVER = webdriver.Chrome(service=SERVICE)
+        DRIVER.implicitly_wait(ELEMENT_WAIT)  # for DRIVER.find_elements
+        ACTIONS = ActionChains(DRIVER)
     if len(sys.argv) > 1:
         SUBCOMMAND, ARGS = sys.argv[1], sys.argv[2:]
         eval(SUBCOMMAND)(*ARGS)  # pylint: disable=eval-used
