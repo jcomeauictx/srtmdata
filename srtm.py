@@ -135,6 +135,9 @@ def login(url=WEBSITE):
     login to earthexplorer.usgs.gov
     '''
     driver_init()
+    if findonly('//a[@href="/logout/"]', wait=0):
+        return  # already logged in
+    logging.debug('not logged in, attempting login now')
     DRIVER.get(url)
     try:
         click('//a[@href="/login"]', By.XPATH, 0)
@@ -337,6 +340,7 @@ def driver_init():
     '''
     global SERVICE, DRIVER, ACTIONS  # pylint: disable=global-statement
     if SERVICE is None:
+        logging.info('reinitializing globals')
         SERVICE = Service(executable_path=CHROMEDRIVER)
         DRIVER = webdriver.Chrome(service=SERVICE)
         DRIVER.implicitly_wait(ELEMENT_WAIT)  # for DRIVER.find_elements
