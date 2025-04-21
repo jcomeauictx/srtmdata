@@ -5,6 +5,7 @@ download all SRTM3 data from USGS
 import sys, time, netrc, logging  # pylint: disable=multiple-imports
 import os, posixpath, re, zipfile  # pylint: disable=multiple-imports
 from shutil import which
+from collections import defaultdict
 from urllib.parse import urlparse
 from glob import glob
 from selenium import webdriver
@@ -291,8 +292,6 @@ def store(zipped, storage=STORAGE):
     STORAGE should ideally be owned by a user (you). this routine will
     attempt to create a subdirectory, srtm1 or srtm3, appropriate to the
     data being written, and a subsubdir to limit the number of files in each
-
-    return is a *count*! a 1 does not indicate failure.
     '''
     pieces = os.path.splitext(os.path.basename(zipped))[0].split('_')
     #logging.debug('pieces: %s', pieces)
@@ -306,24 +305,26 @@ def store(zipped, storage=STORAGE):
     )
     if os.path.exists(outfile):
         logging.info('skipping existing %s', outfile)
-        return 0  # don't overwrite
+        return 'skipped'  # don't overwrite
     os.makedirs(os.path.dirname(outfile), mode=0o755, exist_ok=True)
     with zipfile.ZipFile(zipped) as archive:
         with archive.open(infile) as zipdata, open(outfile, 'wb') as hgtdata:
             logging.info('writing %s', outfile)
             hgtdata.write(zipdata.read())
-    return 1
+    return 'stored'
 
 def store_all(tempstore=TEMPSTORE, storage=STORAGE, url=WEBSITE):
     '''
     save all BIL data in permanent storage location
     '''
     zipfiles = glob(os.path.join(tempstore, '*_v2_bil.zip'))
-    stored = 0
+    count = defaultdict(int)
     for zipped in zipfiles:
-        stored += store(zipped, storage)
-    logging.info('stored %d hgt files', stored)
-    if stored == 0:
+        count[store(zipped, storage)] += 1
+    logging.info('stored %d hgt files', count['stored'])
+    logging.info('skipped %d pre-existing hgt files', count['skipped'])
+    logging.info('total SRTM zip files examined: %d', sum(count.values()))
+    if count['stored'] == 0:
         download(url)
 
 if __name__ == '__main__':
