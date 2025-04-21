@@ -34,7 +34,7 @@ CHROMEDRIVER = which('chromedriver')
 ELEMENT_WAIT = 10  # default time to wait for element to appear
 TEMPSTORE = os.path.expanduser('~/Documents/srtm')
 STORAGE = '/usr/local/share/gis/srtm'  # subdirectories srtm1 and srtm3
-# the following will be redefined in `if __name__ == '__main__'` clause below
+# the following will be redefined in driver_init()
 SERVICE = None
 DRIVER = None
 ACTIONS = None
@@ -46,6 +46,7 @@ def select(#pylint:disable=too-many-locals,too-many-branches,too-many-statements
     '''
     select desired SRTM quadrants
     '''
+    driver_init()
     login(url)
     os.makedirs(tempstore, mode=0o755, exist_ok=True)  # make sure it exists
     click('//div[@id="tab2" and text()="Data Sets"]')  # Data Sets tab
@@ -132,6 +133,7 @@ def login(url=WEBSITE):
     '''
     login to earthexplorer.usgs.gov
     '''
+    driver_init()
     DRIVER.get(url)
     try:
         click('//a[@href="/login"]', By.XPATH, 0)
@@ -220,6 +222,7 @@ def download(url=WEBSITE):
     '''
     download selected SRTM files
     '''
+    driver_init()
     login(url)
     time.sleep(3)  # give website a chance to update count after login
     link = findonly(
@@ -327,12 +330,18 @@ def store_all(tempstore=TEMPSTORE, storage=STORAGE, url=WEBSITE):
     if count['stored'] == 0:
         download(url)
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2 or sys.argv[1] in ('select', 'download'):
+def driver_init():
+    '''
+    redefine SERVICE, DRIVER, and ACTIONS globals and start Selenium driver
+    '''
+    global SERVICE, DRIVER, ACTIONS  # pylint: disable=global-statement
+    if SERVICE is None:
         SERVICE = Service(executable_path=CHROMEDRIVER)
         DRIVER = webdriver.Chrome(service=SERVICE)
         DRIVER.implicitly_wait(ELEMENT_WAIT)  # for DRIVER.find_elements
         ACTIONS = ActionChains(DRIVER)
+
+if __name__ == '__main__':
     if len(sys.argv) > 1:
         SUBCOMMAND, ARGS = sys.argv[1], sys.argv[2:]
         eval(SUBCOMMAND)(*ARGS)  # pylint: disable=eval-used
