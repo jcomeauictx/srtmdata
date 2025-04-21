@@ -305,12 +305,12 @@ def store(zipped, storage=STORAGE):
         storage, srtm, subsubdir, ''.join(pieces[:2]).upper() + '.hgt'
     )
     if os.path.exists(outfile):
-        logging.debug('skipping existing %s', outfile)
+        logging.info('skipping existing %s', outfile)
         return 0  # don't overwrite
     os.makedirs(os.path.dirname(outfile), mode=0o755, exist_ok=True)
     with zipfile.ZipFile(zipped) as archive:
         with archive.open(infile) as zipdata, open(outfile, 'wb') as hgtdata:
-            logging.debug('writing %s', outfile)
+            logging.info('writing %s', outfile)
             hgtdata.write(zipdata.read())
     return 1
 
