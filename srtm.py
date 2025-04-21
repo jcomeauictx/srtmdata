@@ -34,13 +34,14 @@ CHROMEDRIVER = which('chromedriver')
 ELEMENT_WAIT = 10  # default time to wait for element to appear
 TEMPSTORE = os.path.expanduser('~/Documents/srtm')
 STORAGE = '/usr/local/share/gis/srtm'  # subdirectories srtm1 and srtm3
+PATTERN = os.getenv('SRTM_PATTERN') or '.*_3arc_'
 # the following will be redefined in driver_init()
 SERVICE = None
 DRIVER = None
 ACTIONS = None
 
 def select(#pylint:disable=too-many-locals,too-many-branches,too-many-statements
-        pattern='.*_3arc_',
+        pattern=PATTERN,
         tempstore=TEMPSTORE,
         url=WEBSITE):
     '''

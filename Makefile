@@ -3,6 +3,8 @@ OPT := -OO # use `make OPT=-OO` for speed, no debugging output
 PYTHON := python3 $(OPT)
 STORAGE ?= /usr/local/share/gis/srtm
 DRYRUN ?= --dry-run
+SRTM_PATTERN := .*_3arc_
+export SRTM_PATTERN
 all: srtm.pylint make.log
 make.log: .FORCE | srtm.py
 	set -euxo pipefail; \
