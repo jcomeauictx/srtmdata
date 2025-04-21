@@ -24,7 +24,7 @@ HOSTNAME = urlparse(WEBSITE).netloc
 try:
     AUTHDATA = netrc.netrc().authenticators(HOSTNAME)
     if AUTHDATA is None:
-        raise ValueError('no authentication data found for %s', HOSTNAME)
+        raise ValueError(f'no authentication data found for {HOSTNAME}')
 except (FileNotFoundError, ValueError) as noauth:
     AUTHDATA = None
     logging.error('netrc failed, must log in via browser to download data: %s',
@@ -38,7 +38,10 @@ ACTIONS = ActionChains(DRIVER)
 TEMPSTORE = os.path.expanduser('~/Documents/srtm')
 STORAGE = '/usr/local/share/gis/srtm'  # subdirectories srtm1 and srtm3
 
-def select(pattern='.*_3arc_', tempstore=TEMPSTORE, url=WEBSITE):
+def select(#pylint:disable=too-many-locals,too-many-branches,too-many-statements
+        pattern='.*_3arc_',
+        tempstore=TEMPSTORE,
+        url=WEBSITE):
     '''
     select desired SRTM quadrants
     '''
@@ -51,10 +54,10 @@ def select(pattern='.*_3arc_', tempstore=TEMPSTORE, url=WEBSITE):
     click('//div[@id="tab3" and text()="Additional Criteria"]')
     click('//div/strong[text()="Resolution"]/../../div[2]/*[2]')
     logging.info('resolution selectbox should now be visible')
-    select = findonly(
+    selector = findonly(
         '//div[@class="col"]/select/option[3][@value="3-ARC"]/..'
     )
-    arc = Select(select)
+    arc = Select(selector)
     # preselected default is "All" resolutions
     if '_3arc_' in pattern:
         arc.select_by_value('3-ARC')
@@ -222,7 +225,7 @@ def download(url=WEBSITE):
         '//a[normalize-space(@class)="nav-link" and @href="/order/index/"]'
     )
     count = int(link.find_element(By.XPATH, './span').text)
-    if count > 0:
+    if count > 0:  # pylint: disable=too-many-nested-blocks
         link.click()
         click('//button[text()="Start Order"]')
         click('//h4/i[@title="Click to Expand"]')
@@ -318,7 +321,7 @@ def store_all(tempstore=TEMPSTORE, storage=STORAGE, url=WEBSITE):
     zipfiles = glob(os.path.join(tempstore, '*_v2_bil.zip'))
     stored = 0
     for zipped in zipfiles:
-        stored += store(zipped)
+        stored += store(zipped, storage)
     logging.info('stored %d hgt files', stored)
     if stored == 0:
         download(url)
@@ -326,7 +329,7 @@ def store_all(tempstore=TEMPSTORE, storage=STORAGE, url=WEBSITE):
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         SUBCOMMAND, ARGS = sys.argv[1], sys.argv[2:]
-        eval(SUBCOMMAND)(*ARGS)
+        eval(SUBCOMMAND)(*ARGS)  # pylint: disable=eval-used
     else:
         store_all()
 
