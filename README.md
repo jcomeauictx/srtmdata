@@ -24,6 +24,11 @@ less quick but more deterministic:
 * failing that, will loop through all 14000+ SRTM quadrants and add them
   to the cart.
 * a minimum of 3 runs is necessary to complete all the steps.
+* not all steps are fully automated. in particular, the initial parts of
+  the separate webapp that opens a folder on your machine to receive the
+  zipfiles needs some buttons clicked manually. but once it starts downloading,
+  you can just let it run unattended. and you will get an email alerting you
+  to the availability of the download.
 
 ## Developer's notes
 * ["Unable to obtain working Selenium manager binary" using Debian selenium](https://forums.linuxmint.com/viewtopic.php?t=435499), [answer](https://stackoverflow.com/a/78940456/493161)
