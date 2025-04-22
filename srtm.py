@@ -40,10 +40,7 @@ SERVICE = None
 DRIVER = None
 ACTIONS = None
 
-def select(#pylint:disable=too-many-locals,too-many-branches,too-many-statements
-        pattern=PATTERN,
-        tempstore=TEMPSTORE,
-        url=WEBSITE):
+def select(pattern=PATTERN, tempstore=TEMPSTORE, url=WEBSITE):
     '''
     select desired SRTM quadrants
     '''
@@ -243,7 +240,7 @@ def download(url=WEBSITE):
         '//a[normalize-space(@class)="nav-link" and @href="/order/index/"]'
     )
     count = int(link.find_element(By.XPATH, './span').text)
-    if count > 0:  # pylint: disable=too-many-nested-blocks
+    if count > 0:
         link.click()
         click('//button[text()="Start Order"]')
         click('//h4/i[@title="Click to Expand"]')
