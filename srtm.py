@@ -254,10 +254,13 @@ def download(url=WEBSITE):
         page = int(findonly(
             '//button[contains(@class,"currentPage")]'
         ).get_attribute('value'))
-        pages = int(findonly(
-            '//button[contains(@class, " paginationButton") and'
-            ' starts-with(normalize-space(text()), "Last ")]'
-        ).get_attribute('page'))
+        try:
+            pages = int(findonly(
+                '//button[contains(@class, " paginationButton") and'
+                ' starts-with(normalize-space(text()), "Last ")]'
+            ).get_attribute('page'))
+        except AttributeError:
+            pages = 1  # no "Last" button when only one page of results
         while page <= pages:
             logging.info('processing download page %d of %d', page, pages)
             rows = DRIVER.find_elements(
