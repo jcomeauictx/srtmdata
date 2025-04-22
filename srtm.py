@@ -117,6 +117,7 @@ def select(#pylint:disable=too-many-locals,too-many-branches,too-many-statements
             '//input[@class="pageSelector" and @type="number"]',
         ):
             break
+        page += 1
     click('//div/input[@title="View Item Basket"]')
 
 def login(url=WEBSITE):
@@ -282,6 +283,7 @@ def download(url=WEBSITE):
                 '//button[contains(@class,"currentPage")]'
             ):
                 break
+            page += 1
         click('//*[normalize-space(text())="Submit Product Selections"]')
     else:
         select(url=url)
