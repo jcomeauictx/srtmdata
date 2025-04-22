@@ -110,24 +110,13 @@ def select(#pylint:disable=too-many-locals,too-many-branches,too-many-statements
                         logging.info('%s was already in cart', check)
             else:
                 logging.info('%s does not match pattern "%s"', check, pattern)
-        if page < pages:
-            click('//a[@role="button" and starts-with(text(), "Next ")]')
-            while True:
-                logging.debug('waiting for next page to load')
-                try:
-                    pagination = findonly(
-                        '//input[@class="pageSelector" and @type="number"]'
-                    )
-                    newpage = int(pagination.get_attribute('value'))
-                    if newpage == page:
-                        raise StaleElementReferenceException('Same page number')
-                    page = newpage
-                    break
-                except StaleElementReferenceException:
-                    logging.info('page still stale')
-                    time.sleep(1)
-        else:
-            break  # don't keep looping over final page
+        if not nextpage(
+            page,
+            pages,
+            '//a[@role="button" and starts-with(text(), "Next ")]',
+            '//input[@class="pageSelector" and @type="number"]',
+        ):
+            break
     click('//div/input[@title="View Item Basket"]')
 
 def login(url=WEBSITE):
@@ -222,6 +211,26 @@ def get_rows():
     )
     return rows
 
+def nextpage(page, pages, button, text_element):
+    '''
+    advance to next page of web application
+    '''
+    if page < pages:
+        click(button)
+        while True:
+            logging.debug('waiting for next page to load')
+            try:
+                newpage = int(findonly(text_element).get_attribute('value'))
+                if newpage == page:
+                    raise StaleElementReferenceException('Same page number')
+                page = newpage
+                break
+            except StaleElementReferenceException:
+                logging.info('page still stale')
+                time.sleep(1)
+        return True
+    return False  # don't keep looping over final page
+
 def download(url=WEBSITE):
     '''
     download selected SRTM files
@@ -265,27 +274,14 @@ def download(url=WEBSITE):
                 )
                 ACTIONS.move_to_element(selector).perform()
                 selector.click()
-            if page < pages:
-                click('//button[contains(@class, " paginationButton") and'
-                      ' starts-with(normalize-space(text()), "Next ")]')
-                time.sleep(7)  # let next page start loading
-                while True:
-                    logging.debug('waiting for next page to load')
-                    try:
-                        newpage = int(findonly(
-                            '//button[contains(@class,"currentPage")]'
-                        ).get_attribute('value'))
-                        if newpage == page:
-                            raise StaleElementReferenceException(
-                                'Same page number'
-                            )
-                        page = newpage
-                        break
-                    except (TimeoutException, StaleElementReferenceException):
-                        logging.info('page still stale')
-                        time.sleep(1)
-            else:
-                break  # don't keep looping over final page
+            if not nextpage(
+                page,
+                pages,
+                '//button[contains(@class, " paginationButton") and'
+                ' starts-with(normalize-space(text()), "Next ")]',
+                '//button[contains(@class,"currentPage")]'
+            ):
+                break
         click('//*[normalize-space(text())="Submit Product Selections"]')
     else:
         select(url=url)
