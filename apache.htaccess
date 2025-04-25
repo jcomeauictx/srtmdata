@@ -1,0 +1,2 @@
+AddHandler cgi-script .cgi
+ErrorDocument 404 /srtm/nosuchfile.cgi
