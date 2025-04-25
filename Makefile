@@ -16,5 +16,16 @@ upload:
 	done
 %.pylint: %.py
 	pylint $<
+server:
+	# modifications to $STORAGE on server
+	# empty index.html files prevent listing directories without
+	# needing Apache directives.
+	# compressing saves space on server, and .htaccess can be used
+	# to decompress on the fly.
+	# must `make server` *after* $STORAGE fully populated for foolproof
+	# operation.
+	for directory in $(STORAGE)/srtm? $(STORAGE)/srtm?/???; do \
+	 touch $$directory/index.html; \
+	done
 .PRECIOUS: make.log
 .FORCE:
