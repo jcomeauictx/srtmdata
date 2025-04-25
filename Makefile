@@ -16,6 +16,12 @@ upload:
 	done
 %.pylint: %.py
 	pylint $<
+%.hgt.zip: %.hgt
+	@echo Making $@ from $<
+	cd $(<D) && zip --move $(@F) $(<F)
+%.hgt: %.hgt.zip
+	@echo Making $@ from $<
+	cd $(<D) && unzip $(<F) && rm -f $<
 server:
 	# modifications to $STORAGE on server
 	# empty index.html files prevent listing directories without
@@ -26,6 +32,14 @@ server:
 	# operation.
 	for directory in $(STORAGE)/srtm? $(STORAGE)/srtm?/???; do \
 	 touch $$directory/index.html; \
+	done
+zipall: $(STORAGE)
+	for file in $$(find $</ -name '*.hgt'); do \
+	 $(MAKE) -s $$file.zip; \
+	done
+unzipall: $(STORAGE)
+	for file in $$(find $</ -name '*.hgt.zip'); do \
+	 $(MAKE) -s $${file%%.zip}; \
 	done
 .PRECIOUS: make.log
 .FORCE:
