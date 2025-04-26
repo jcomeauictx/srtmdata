@@ -1,6 +1,6 @@
 #!/bin/bash
 # strip out all unnecessary characters to avoid backdoor shells
-request=$DOCUMENT_ROOT${REQUEST_URI//[^0-9A-Za-z/_.-]/}
+request=$DOCUMENT_ROOT${REQUEST_URI//[^0-9A-Za-z\/_.-]}
 logger received request for $request
 if [ -e $request.zip ]; then
 	logger serving $request from $request.zip
@@ -14,5 +14,4 @@ else
 	printf "Content-type: text/plain\r\n"
 	printf "\r\n"
 	echo 404 File $request not found
-	env
 fi
