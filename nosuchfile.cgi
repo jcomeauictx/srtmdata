@@ -12,6 +12,7 @@ else
 	logger resending 404 status
 	printf "Status: 404 File not found\r\n"
 	printf "Content-type: text/plain\r\n"
+	printf "\r\n"
 	echo 404 File $request not found
 	env
 fi
