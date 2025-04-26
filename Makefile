@@ -33,6 +33,8 @@ server:
 	for directory in $(STORAGE)/srtm? $(STORAGE)/srtm?/???; do \
 	 touch $$directory/index.html; \
 	done
+	cp apache.htaccess $(STORAGE)/.htaccess
+	cp nosuchfile.cgi $(STORAGE)/
 zipall: $(STORAGE)
 	for file in $$(find $</ -name '*.hgt'); do \
 	 $(MAKE) -s $$file.zip; \
