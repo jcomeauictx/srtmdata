@@ -1,6 +1,6 @@
 #!/bin/bash
 # strip out all unnecessary characters to avoid backdoor shells
-request=$DOCUMENT_ROOT${REDIRECT_QUERY_STRING//[^0-9A-Za-z/_.-]/}
+request=$DOCUMENT_ROOT${REQUEST_URI//[^0-9A-Za-z/_.-]/}
 logger received request for $request
 if [ -e $request.zip ]; then
 	logger serving $request from $request.zip
@@ -9,6 +9,7 @@ if [ -e $request.zip ]; then
 	printf "\r\n"
 	unzip -p $request.zip $(basename $request)
 else
-	printf "Content-type: text/html\r\n\r\n"
-	echo 404 File Not Found
+	printf "Status: 404 File not found\r\n"
+	printf "Content-type: text/plain\r\n"
+	echo 404 File $request not found
 fi
