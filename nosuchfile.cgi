@@ -12,4 +12,5 @@ else
 	printf "Status: 404 File not found\r\n"
 	printf "Content-type: text/plain\r\n"
 	echo 404 File $request not found
+	env
 fi
