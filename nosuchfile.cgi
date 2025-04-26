@@ -9,6 +9,7 @@ if [ -e $request.zip ]; then
 	printf "\r\n"
 	unzip -p $request.zip $(basename $request)
 else
+	logger resending 404 status
 	printf "Status: 404 File not found\r\n"
 	printf "Content-type: text/plain\r\n"
 	echo 404 File $request not found
